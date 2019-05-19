@@ -137,6 +137,10 @@ F90FLAGS += -DPICO $(shell python -c "import pypico; print pypico.get_include()"
 endif
 endif
 
+#MultiNest Library
+LIB_NS =../MultiNest
+LINKFLAGS += -L$(LIB_NS) -lnest3 
+F90FLAGS += $(IFLAG)$(LIB_NS)
 
 UTILS = $(OUTPUT_DIR)/MiscUtils.o $(OUTPUT_DIR)/ArrayUtils.o $(OUTPUT_DIR)/StringUtils.o $(OUTPUT_DIR)/MpiUtils.o $(OUTPUT_DIR)/FileUtils.o \
     $(OUTPUT_DIR)/RandUtils.o $(OUTPUT_DIR)/ObjectLists.o $(OUTPUT_DIR)/Interpolation.o
@@ -182,7 +186,7 @@ DATAMODULES += $(OUTPUT_DIR)/wl.o $(OUTPUT_DIR)/wlhsc.o
 
 COSMOFILES = $(OUTPUT_DIR)/CosmologyTypes.o $(OUTPUT_DIR)/CosmoTheory.o $(OUTPUT_DIR)/bbn.o $(OUTPUT_DIR)/Calculator_Cosmology.o \
 	$(OUTPUT_DIR)/CalcLike_Cosmology.o $(OUTPUT_DIR)/Likelihood_Cosmology.o $(CALCFILES) $(DATAMODULES) $(PARAMETERIZATION) $(LIKEFILES) \
-	$(OUTPUT_DIR)/CosmologyConfig.o
+	$(OUTPUT_DIR)/CosmologyConfig.o $(OUTPUT_DIR)/nestwrap.o
 
 OBJFILES += $(COSMOFILES) $(OUTPUT_DIR)/driver.o
 
@@ -279,7 +283,7 @@ F90FLAGS += $(IFLAG)$(cfitsio)/include $(IFLAG)$(WMAP) -DWMAP
 LINKFLAGS +=  -L$(cfitsio)/lib -L$(WMAP) -lcfitsio -lwmap9
 endif
 
-F90FLAGS += $(MODOUT) $(IFLAG)$(OUTPUT_DIR)/
+F90FLAGS += $(MODOUT) $(IFLAG)$(OUTPUT_DIR)/  $(IFLAG)$(LIB_NS) 
 
 export FFLAGS
 export F90C
@@ -302,20 +306,23 @@ $(OUTPUT_DIR)/%.o: %.F90 Makefile
 $(OUTPUT_DIR)/fpico_interface.o: $(PICO)/fpico_interface.f90 Makefile
 	$(F90C) $(F90FLAGS) -c $(PICO)/fpico_interface.f90 -o $(OUTPUT_DIR)/fpico_interface.o
 
-cosmomc: directories camb $(OBJFILES)
+cosmomc: directories multinest camb $(OBJFILES)
 	$(F90C) -o ../cosmomc $(OBJFILES) $(LINKFLAGS) $(F90FLAGS)
 
-cosmomc_debug: directories camb $(OBJFILES)
+cosmomc_debug: directories multinest camb $(OBJFILES)
 	$(F90C) -o ../cosmomc_debug $(OBJFILES) $(LINKFLAGS) $(F90FLAGS)
 
 
-clean: cleancosmomc
+clean: cleancosmomc cleanmultinest
 	cd ../camb; make clean
 
 cleancosmomc:
 	rm -f $(OUTPUT_DIR)/*.o $(OUTPUT_DIR)/*.mod ../core
 	rm -rf Release*
 	rm -rf Debug*
+
+cleanmultinest:
+	cd $(LIB_NS); $(MAKE) clean
 
 getdist: directories $(DISTFILES)
 	$(F90C) -o ../getdist $(DISTFILES) $(LAPACKL) $(GETDISTFLAGS)
@@ -324,6 +331,9 @@ camb:
 	cd ../camb && \
 	$(MAKE) --file=Makefile_main libcamb OUTPUT_DIR=$(OUTPUT_DIR) \
 	RECOMBINATION=$(RECOMBINATION) EQUATIONS=equations_ppf NONLINEAR=halofit_ppf
+
+multinest:
+	cd $(LIB_NS); $(MAKE) all
 
 $(highL)/libhigh.a:
 	cd $(highL); make libhigh.a;
