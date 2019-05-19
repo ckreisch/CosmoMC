@@ -968,7 +968,7 @@ module nestwrap
                 i_assigned=.true.
             endif
 
-            if (i_assigned==.false.) then
+            if (.not. i_assigned) then
                 ! Otherwise, assume uniform
                 ! Add this integer to the Uniform cosmo_pars array
                 call Uniform%add_point( params_used(i) )
