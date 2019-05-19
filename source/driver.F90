@@ -10,6 +10,7 @@
     use DataLikelihoodList
     use RandUtils
     use bbn
+    use nestwrap, DUMMY1 => logZero, DUMMY2 => MPI_SUCCESS, DUMMY3 => MPI_COMM_WORLD, DUMMY4 => MPI_CHARACTER, DUMMY5 => MPI_WTIME  !tag+
     implicit none
 
     character(LEN=:), allocatable :: LogFileName,  numstr, fname, rootdir
@@ -116,6 +117,9 @@
         test_output_root = Ini%Read_String('test_output_root')
         test_used_params = Ini%Read_String('test_used_params') !If not specified, just take from central value
         test_check_compare = Ini%Read_Double('test_check_compare',logZero)
+    else if (Setup%action==action_MultiNest) then	
+        nest_resume = Ini%Read_Logical('checkpoint',.false.)
+        rootname = baseroot
     end if
 
     new_chains = .true.
@@ -152,11 +156,13 @@
     num_threads = Ini%Read_Int('num_threads',0)
     !$ if (num_threads /=0) call OMP_SET_NUM_THREADS(num_threads)
 
-    estimate_propose_matrix = Ini%Read_Logical('estimate_propose_matrix',.false.)
-    if (estimate_propose_matrix) then
-        if (Ini%Read_String('propose_matrix') /= '') &
-            call DoAbort('Cannot have estimate_propose_matrix and propose_matrix')
-    end if
+    if (Setup%action /= action_MultiNest) then
+        estimate_propose_matrix = Ini%Read_Logical('estimate_propose_matrix',.false.)
+        if (estimate_propose_matrix) then
+            if (Ini%Read_String('propose_matrix') /= '') &
+                call DoAbort('Cannot have estimate_propose_matrix and propose_matrix')
+        end if
+    endif
     want_minimize = Setup%action == action_maxlike .or. Setup%action==action_Hessian &
         .or. Setup%action == action_MCMC .and. estimate_propose_matrix .or. &
         start_at_bestfit .and. new_chains
@@ -201,12 +207,15 @@
         end if
     end if
 
+    !read the MultiNest parameters
+    if (Setup%action==action_MultiNest) call read_multinest_inputs(Ini)
+
     call Ini%Close()
 
     call Setup%DoneInitialize()
 
 
-    if (MpiRank==0 .and. Setup%action==action_MCMC .and. BaseParams%NameMapping%nnames/=0) then
+    if (MpiRank==0 .and. (Setup%action==action_MCMC .or. Setup%action==action_MultiNest) .and. BaseParams%NameMapping%nnames/=0) then
         call BaseParams%OutputParamNames(baseroot, params_used, add_derived = .true.)
         call BaseParams%OutputParamRanges(baseroot)
     end if
@@ -279,6 +288,10 @@
             if (status/=0) call MpiStop('Error reading test_used_params array')
         end if
         call Setup%DoTests(test_output_root,test_paramvals, test_check_compare)
+    else if (Setup%action==action_MultiNest) then
+        call setup_multinest
+        if (Feedback > 0 .and. MPIRank==0) write (*,*) 'starting nested sampling'
+        call nest_sample
     else
         call DoAbort('undefined action')
     end if
