@@ -1,0 +1,28 @@
+# ntpcf =   10
+# ncol  =   31
+# np1   =   15
+# np2   =   18
+# nm1   =   21
+# nm2   =   24
+# ndvec =   80
+# input files:
+ 1x1           1
+ 1x2           0
+ 1x3           1
+ 1x4           1
+ 2x2           0
+ 2x3           0
+ 2x4           0
+ 3x3           1
+ 3x4           1
+ 4x4           1
+# angular bins for xi_+:
+          15
+          16
+          17
+          18
+# angular bins for xi_-:
+          21
+          22
+          23
+          24

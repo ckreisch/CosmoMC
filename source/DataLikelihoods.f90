@@ -15,6 +15,7 @@
     use wigglez
     use szcounts !Anna
     use wl
+    use wlhsc
     use ElementAbundances
     class(TSettingIni), intent(in) :: Ini
 
@@ -37,6 +38,8 @@
     call SZLikelihood_Add(DataLikelihoods, Ini) !Anna
 
     call WLLikelihood_Add(DataLikelihoods, Ini)
+
+    call HSCWL_Likelihood_Add(DataLikelihoods, Ini)
 
     end subroutine SetDataLikelihoods
 

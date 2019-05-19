@@ -32,6 +32,7 @@
     integer i
 
     call Ini%TagValuesForName('abundance_dataset', DataSets, filename=.true.)
+    print *, ">>>>> DEBUG, Abundances added"
 
     do i= 1, DataSets%Count
         call Ini%SettingValuesForTagName('abundance_dataset',DataSets%Name(i),OverrideSettings)

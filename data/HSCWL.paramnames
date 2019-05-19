@@ -1,0 +1,11 @@
+aia        A_{ia}
+etaia        \eta_{ia}
+z0ia         z0_{ia}
+delm      \delta_{m,100}
+delz1         \delta_{z1}
+delz2         \delta_{z2}
+delz3         \delta_{z3}
+delz4         \delta_{z4}
+ce         \delta_e
+apsf         a_{psf}
+bpsf         b_{psf}

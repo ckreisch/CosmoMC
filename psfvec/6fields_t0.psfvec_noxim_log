@@ -1,0 +1,30 @@
+# ntpcf =   10
+# ncol  =   31
+# np1   =   15
+# np2   =   23
+# nm1   =   21
+# nm2   =   28
+# ndvec =  170
+# input files:
+/work01/hscCSana/s16a_v2.0/psferr/6fields_pxp.xi
+/work01/hscCSana/s16a_v2.0/psferr/6fields_pxq.xi
+/work01/hscCSana/s16a_v2.0/psferr/6fields_qxq.xi
+# angular bins for xi_+:
+          15   7.94328022    
+          16   10.0000000    
+          17   12.5892496    
+          18   15.8489304    
+          19   19.9526196    
+          20   25.1188602    
+          21   31.6227798    
+          22   39.8107185    
+          23   50.1187210    
+# angular bins for xi_-:
+          21   31.6227798    
+          22   39.8107185    
+          23   50.1187210    
+          24   63.0957298    
+          25   79.4328232    
+          26   100.000000    
+          27   125.892540    
+          28   158.489319    

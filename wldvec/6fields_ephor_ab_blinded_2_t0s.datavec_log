@@ -1,0 +1,28 @@
+# ntpcf =   10
+# ncol  =   31
+# np1   =   15
+# np2   =   18
+# nm1   =   21
+# nm2   =   24
+# ndvec =   80
+# input files:
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_1x1_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_1x2_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_1x3_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_1x4_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_2x2_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_2x3_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_2x4_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_3x3_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_3x4_blinded_2.xi
+/work01/hscCSana/s16a_v2.0/TPCF_blinded/6fields_ephor_ab_CHbin_4x4_blinded_2.xi
+# angular bins for xi_+:
+          15   7.94328022    
+          16   10.0000000    
+          17   12.5892496    
+          18   15.8489304    
+# angular bins for xi_-:
+          21   31.6227798    
+          22   39.8107185    
+          23   50.1187210    
+          24   63.0957298    

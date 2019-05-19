@@ -78,6 +78,7 @@
     Type(TSettingIni) :: DataSets, OverrideSettings
 
     if (.not. Ini%Read_Logical('use_BAO',.false.)) return
+    print*, "DEBUG >>>> Adding BAO Likelihood"
 
     call Ini%TagValuesForName('bao_dataset', DataSets, filename=.true.)
     if (DataSets%Count==0) call MpiStop('Use_BAO but no bao_dataset[NAMETAG] defined')
