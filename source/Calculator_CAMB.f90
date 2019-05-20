@@ -233,7 +233,7 @@
                 if (CosmoSettings%cl_lmax(i,i)>0) then
                     if (any(Theory%cls(i,i)%Cl(:) < 0 )) then
                         error = 1
-                        call MpiStop('Calculator_CAMB: negative C_l (could edit to silent error here)')
+                        !call MpiStop('Calculator_CAMB: negative C_l (could edit to silent error here)')
                         return
                     end if
                 end if
@@ -241,7 +241,7 @@
                     if (CosmoSettings%cl_lmax(i,j)>0) then
                         if ( any(ieee_is_nan(Theory%cls(i,j)%Cl))) then
                             error=1
-                            write(*,*) 'WARNING: NaN CL?', i, j
+                            !write(*,*) 'WARNING: NaN CL?', i, j
                             return
                         end if
                     end if
@@ -259,7 +259,7 @@
         if (CosmoSettings%Use_LSS) then
             call this%SetPkFromCAMB(Info%Transfers%MTrans,Theory,error)
             if (error/=0) then
-                write(*,*) 'WARNING: NaN PK?'
+                !write(*,*) 'WARNING: NaN PK?'
                 return
             end if
         end if
@@ -311,7 +311,7 @@
         call this%SetPowersFromCAMB(CMB,Theory)
         if (any(Theory%cls(1,1)%Cl(:) < 0 )) then
             error = 1
-            call MpiStop('Calculator_CAMB: negative C_l (could edit to silent error here)')
+            !call MpiStop('Calculator_CAMB: negative C_l (could edit to silent error here)')
         end if
         do i=1, min(3,CosmoSettings%num_cls)
             if(error/=0) exit
@@ -319,7 +319,7 @@
                 if (CosmoSettings%cl_lmax(i,j)>0) then
                     if ( any(ieee_is_nan(Theory%cls(i,j)%Cl))) then
                         error=1
-                        write(*,*) 'WARNING: NaN CL?'
+                        !write(*,*) 'WARNING: NaN CL?'
                         exit
                     end if
                 end if
@@ -330,7 +330,7 @@
     if (DoPK .and. error==0) then
         Theory%sigma_8 = Info%Transfers%MTrans%sigma_8(size(Info%Transfers%MTrans%sigma_8,1),1)
         call this%SetPkFromCAMB(Info%Transfers%MTrans,Theory,error)
-        if (error/=0) write(*,*) 'WARNING: NaN PK?'
+        !if (error/=0) write(*,*) 'WARNING: NaN PK?'
     end if
 
     if (error==0) call this%SetDerived(Theory)
