@@ -24,12 +24,6 @@
     !     for restrictions on the modification and distribution of this software.
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    MODULE KeepMatterPower
-    integer pkmatterdim,pkredshiftsdim
-    END MODULE KeepMatterPower
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     module ModelParams
     use precision
     use Ranges
@@ -2553,103 +2547,6 @@
     end do
 
     end subroutine Transfer_SaveMatterPower
-
-!!! TH2017/12/18 begin !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    subroutine Transfer_GetMatterPowerDim(MTrans)
-    use IniFile
-    use KeepMatterPower
-    Type(MatterTransferData), intent(in) :: MTrans
-    integer itf
-    real minkh,dlnkh
-    Type(MatterPowerData) :: PK_data
-    
-    itf=1
-
-    if (CP%InitPower%nn>1) error stop 'InitPower%nn>1 deprecated'
-
-    if (.not. transfer_interp_matterpower ) then
-        pkmatterdim=MTrans%num_q_trans
-        pkredshiftsdim=CP%Transfer%PK_num_redshifts
-    else
-        minkh = 1e-4
-        dlnkh = 0.02
-       	pkmatterdim=log(MTrans%TransferData(Transfer_kh,MTrans%num_q_trans,itf)/minkh)/dlnkh+1
-	pkredshiftsdim=CP%Transfer%PK_num_redshifts
-    endif
-
-    end subroutine Transfer_GetMatterPowerDim
-
-    subroutine Transfer_KeepMatterPower(MTrans,keepmatterpk)
-    use IniFile
-    use KeepMatterPower
-!    use constants
-    !Export files of total  matter power spectra in h^{-1} Mpc units, against k/h.
-    Type(MatterTransferData), intent(in) :: MTrans
-    integer itf,in,i
-    integer points
-    real, dimension(:,:,:), allocatable :: outpower
-    real minkh,dlnkh
-    Type(MatterPowerData) :: PK_data
-    integer ncol
-    !JD 08/13 Changes in here to PK arrays and variables
-    integer itf_PK
-    integer unit
-    real keepmatterpk(pkmatterdim,0:pkredshiftsdim)
-
-    ncol=1
-
-!    write(*,*)102,pkmatterdim,pkredshiftsdim
-
-    do itf=1, CP%Transfer%PK_num_redshifts
-        if (.not. transfer_interp_matterpower ) then
-            itf_PK = CP%Transfer%PK_redshifts_index(itf)
-
-	    points = MTrans%num_q_trans
-
-            allocate(outpower(points,CP%InitPower%nn,ncol))
-	    
-            do in = 1, CP%InitPower%nn
-                call Transfer_GetMatterPowerData(MTrans, PK_data, in, itf_PK)
-                !JD 08/13 for nonlinear lensing of CMB + LSS compatibility
-                !Changed (CP%NonLinear/=NonLinear_None) to CP%NonLinear/=NonLinear_none .and. CP%NonLinear/=NonLinear_Lens)
-                if(CP%NonLinear/=NonLinear_none .and. CP%NonLinear/=NonLinear_Lens)&
-                    call MatterPowerdata_MakeNonlinear(PK_Data)
-
-                outpower(:,in,1) = exp(PK_data%matpower(:,1))
-                call MatterPowerdata_Free(PK_Data)
-            end do
-            do i=1,points
-		keepmatterpk(i,itf)=outpower(i,1,1)
-            end do
-        else
-            minkh = 1e-4
-            dlnkh = 0.02
-            points = log(MTrans%TransferData(Transfer_kh,MTrans%num_q_trans,itf)/minkh)/dlnkh+1
-            !             dlnkh = log(MTrans%TransferData(Transfer_kh,MTrans%num_q_trans,itf)/minkh)/(points-0.999)
-            allocate(outpower(points,CP%InitPower%nn,1))
-            do in = 1, CP%InitPower%nn
-                call Transfer_GetMatterPowerS(MTrans,outpower(1,in,1), itf, in, minkh,dlnkh, points)
-            end do
-            do i=1,points
-		keepmatterpk(i,itf)=outpower(i,1,1)
-            end do
-        end if
-        deallocate(outpower)
-    end do
-
-    itf=0
-    if (.not. transfer_interp_matterpower ) then
-        do i=1,points
-            keepmatterpk(i,itf)=MTrans%TransferData(Transfer_kh,i,1)
-        enddo
-    else
-        do i=1,points
-            keepmatterpk(i,itf)=minkh*exp((i-1)*dlnkh)
-        end do
-    endif
-
-    end subroutine Transfer_KeepMatterPower
-!!! TH2017/12/18 end !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     !JD 08/13 New function for nonlinear lensing of CMB + MPK compatibility
     !Build master redshift array from array of desired Nonlinear lensing (NLL)

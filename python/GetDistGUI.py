@@ -9,14 +9,16 @@ import getdist
 try:
     import argparse
 except ImportError:
-    print('use "module load" to load python 2.7+ or 3.6+, or see docs/readme_python.html for how to install')
+    print('use "module load" to load python 2.7+, or see docs/readme_python.html for how to install')
     sys.exit()
 
 try:
-    from getdist.gui.mainwindow import MainWindow, QApplication
+    from getdist.gui.mainwindow import MainWindow
 except ImportError:
     print("Could not find getdist.gui.mainwindow: configure your PYTHONPATH as described in the readme!")
     raise
+
+from PySide.QtGui import QApplication
 
 parser = argparse.ArgumentParser(description='GetDist GUI')
 parser.add_argument('-v', '--verbose', help='verbose', action="store_true")

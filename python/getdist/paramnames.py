@@ -2,6 +2,7 @@
 import os
 import fnmatch
 import six
+import matplotlib
 from itertools import chain
 from collections import OrderedDict
 
@@ -21,7 +22,6 @@ def makeList(roots):
 
 
 def escapeLatex(text):
-    if text: import matplotlib
     if text and matplotlib.rcParams['text.usetex']:
         return text.replace('_', '{\\textunderscore}')
     else:

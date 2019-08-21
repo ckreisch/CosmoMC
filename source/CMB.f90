@@ -67,7 +67,6 @@
     Type(TSettingIni) :: DataSets, OverrideSettings
 
     call Ini%TagValuesForName('cmb_dataset', DataSets, filename=.true.)
-    print*, "DEBUG >>>> Adding CMB Likelihood"
 
     do i= 1, DataSets%Count
         call Ini%SettingValuesForTagName('cmb_dataset',DataSets%Name(i),OverrideSettings)
