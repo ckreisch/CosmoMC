@@ -9,6 +9,7 @@
     use GeneralSetup
     use DataLikelihoodList
     use RandUtils
+    use nestwrap
     use bbn
     implicit none
 
@@ -116,6 +117,8 @@
         test_output_root = Ini%Read_String('test_output_root')
         test_used_params = Ini%Read_String('test_used_params') !If not specified, just take from central value
         test_check_compare = Ini%Read_Double('test_check_compare',logZero)
+    else if (Setup%action==action_PolyChord) then	
+        rootname = baseroot
     end if
 
     new_chains = .true.
@@ -152,11 +155,13 @@
     num_threads = Ini%Read_Int('num_threads',0)
     !$ if (num_threads /=0) call OMP_SET_NUM_THREADS(num_threads)
 
-    estimate_propose_matrix = Ini%Read_Logical('estimate_propose_matrix',.false.)
-    if (estimate_propose_matrix) then
-        if (Ini%Read_String('propose_matrix') /= '') &
+    if (Setup%action /= action_PolyChord) then
+        estimate_propose_matrix = Ini%Read_Logical('estimate_propose_matrix',.false.)
+        if (estimate_propose_matrix) then
+            if (Ini%Read_String('propose_matrix') /= '') &
             call DoAbort('Cannot have estimate_propose_matrix and propose_matrix')
-    end if
+        end if
+    endif
     want_minimize = Setup%action == action_maxlike .or. Setup%action==action_Hessian &
         .or. Setup%action == action_MCMC .and. estimate_propose_matrix .or. &
         start_at_bestfit .and. new_chains
@@ -201,12 +206,17 @@
         end if
     end if
 
+    !read the PolyChord parameters
+    if (Setup%action==action_PolyChord) then
+        call Initialise_PolyChord_Settings(Ini)
+    end if
+
     call Ini%Close()
 
     call Setup%DoneInitialize()
 
 
-    if (MpiRank==0 .and. Setup%action==action_MCMC .and. BaseParams%NameMapping%nnames/=0) then
+    if (MpiRank==0 .and. (Setup%action==action_MCMC .or. Setup%action==action_PolyChord) .and. BaseParams%NameMapping%nnames/=0) then
         call BaseParams%OutputParamNames(baseroot, params_used, add_derived = .true.)
         call BaseParams%OutputParamRanges(baseroot)
     end if
@@ -279,12 +289,27 @@
             if (status/=0) call MpiStop('Error reading test_used_params array')
         end if
         call Setup%DoTests(test_output_root,test_paramvals, test_check_compare)
+    else if (Setup%action==action_PolyChord) then
+        
+        call setup_polychord
+        
+#ifdef MPI
+        if (Feedback > 0 .and. MPIRank==0) write (*,*) 'starting nested sampling'
+        call nest_sample(MPI_COMM_WORLD)
+#else
+        write (*,*) 'starting nested sampling'
+        call nest_sample(0)
+#endif
     else
         call DoAbort('undefined action')
     end if
     call LogFile%Close()
 
-    call DoStop('Total requested samples obtained',.true.)
+    if (Setup%action==action_PolyChord) then	
+        call DoStop('PolyChord has finished')
+    else
+        call DoStop('Total requested samples obtained',.true.)
+    end if
 
     contains
 
