@@ -10,7 +10,7 @@
     use ParamPointSet
     implicit none
 
-    integer, parameter :: action_MCMC=0, action_importance=1, action_maxlike=2, action_hessian=3, action_tests=4
+    integer, parameter :: action_MCMC=0, action_importance=1, action_maxlike=2, action_hessian=3, action_tests=4, action_PolyChord=5 
 
     Type :: TSetup
         integer :: action = action_MCMC
@@ -49,7 +49,7 @@
     class(TSettingIni) :: Ini
 
     call this%Config%ReadParams(Ini)
-    this%action = Ini%Read_Int('action',action_MCMC,min=0,max=action_tests)
+    this%action = Ini%Read_Int('action',action_MCMC,min=0,max=action_PolyChord)
     if (this%action/=action_importance) use_fast_slow = Ini%Read_Logical('use_fast_slow',.true.)
 
     call this%LikeCalculator%InitWithParams(Ini, this%Config)

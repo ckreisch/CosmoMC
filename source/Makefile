@@ -150,6 +150,9 @@ F90FLAGS += -DPICO $(shell python -c "import pypico; print pypico.get_include()"
 endif
 endif
 
+#PolyChord Library
+LINKFLAGS += -L../polychord/lib -lchord
+F90FLAGS += $(IFLAG)../polychord/src/polychord/
 
 DISTFILES = $(OUTPUT_DIR)/ObjectParamNames.o  \
     $(OUTPUT_DIR)/settings.o $(OUTPUT_DIR)/samples.o $(OUTPUT_DIR)/IO.o $(OUTPUT_DIR)/GetDist.o
@@ -190,7 +193,7 @@ DATAMODULES += $(OUTPUT_DIR)/wl.o
 
 COSMOFILES = $(OUTPUT_DIR)/CosmologyTypes.o $(OUTPUT_DIR)/CosmoTheory.o $(OUTPUT_DIR)/bbn.o $(OUTPUT_DIR)/Calculator_Cosmology.o \
 	$(OUTPUT_DIR)/CalcLike_Cosmology.o $(OUTPUT_DIR)/Likelihood_Cosmology.o $(CALCFILES) $(DATAMODULES) $(PARAMETERIZATION) $(LIKEFILES) \
-	$(OUTPUT_DIR)/CosmologyConfig.o
+	$(OUTPUT_DIR)/CosmologyConfig.o $(OUTPUT_DIR)/nestwrap.o
 
 OBJFILES += $(COSMOFILES) $(OUTPUT_DIR)/driver.o
 
@@ -233,6 +236,8 @@ $(OUTPUT_DIR)/MCMC.o: $(OUTPUT_DIR)/calclike.o $(OUTPUT_DIR)/propose.o $(OUTPUT_
 $(OUTPUT_DIR)/minimize.o: $(OUTPUT_DIR)/PowellConstrainedMinimize.o $(OUTPUT_DIR)/MCMC.o
 $(OUTPUT_DIR)/SampleCollector.o: $(OUTPUT_DIR)/MCMC.o
 $(OUTPUT_DIR)/GeneralSetup.o: $(OUTPUT_DIR)/SampleCollector.o $(OUTPUT_DIR)/ImportanceSampling.o  $(OUTPUT_DIR)/minimize.o
+
+$(OUTPUT_DIR)/nestwrap.o: $(OUTPUT_DIR)/GeneralSetup.o $(OUTPUT_DIR)/settings.o $(OUTPUT_DIR)/BaseParameters.o 
 
 $(OUTPUT_DIR)/driver.o: $(OUTPUT_DIR)/GeneralSetup.o $(OUTPUT_DIR)/CosmologyConfig.o
 
@@ -301,20 +306,23 @@ $(OUTPUT_DIR)/%.o: %.F90 Makefile
 $(OUTPUT_DIR)/fpico_interface.o: $(PICO)/fpico_interface.f90 Makefile
 	$(F90C) $(F90FLAGS) -c $(PICO)/fpico_interface.f90 -o $(OUTPUT_DIR)/fpico_interface.o
 
-cosmomc: directories camb $(OBJFILES)
+cosmomc: directories polychord camb $(OBJFILES)
 	$(F90C) -o ../cosmomc $(OBJFILES) $(LINKFLAGS) $(F90FLAGS)
 
-cosmomc_debug: directories camb $(OBJFILES)
+cosmomc_debug: directories polychord camb $(OBJFILES)
 	$(F90C) -o ../cosmomc_debug $(OBJFILES) $(LINKFLAGS) $(F90FLAGS)
 
 
-clean: cleancosmomc
+clean: cleancosmomc cleanpolychord 
 	cd ../camb/forutils; make clean
 
 cleancosmomc:
 	rm -f $(OUTPUT_DIR)/*.o $(OUTPUT_DIR)/*.mod ../core
 	rm -rf Release*
 	rm -rf Debug*
+
+cleanpolychord:
+	cd ../polychord; $(MAKE) veryclean
 
 getdist: directories $(DISTFILES)
 	$(F90C) -o ../getdist $(DISTFILES) $(LAPACKL) $(GETDISTFLAGS)
@@ -323,6 +331,9 @@ camb:
 	cd ../camb/fortran && \
 	$(MAKE) --file=Makefile_main libcamb OUTPUT_DIR=$(OUTPUT_DIR) \
     FORUTILSPATH=$(FORUTILSPATH)
+
+polychord:
+	cd ../polychord; $(MAKE) libchord.a BUILD=$(BUILD)
 
 $(highL)/libhigh.a:
 	cd $(highL); make libhigh.a;

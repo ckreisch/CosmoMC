@@ -1,41 +1,53 @@
 ===================
-CosmoMC
+CosmoChord
 ===================
-:CosmoMC:  Fortran 2008 parallelized MCMC sampler (general and cosmology)
-:Homepage: http://cosmologist.info/cosmomc/
+:CosmoChord:  PolyChord + CosmoMC for cosmological parameter estimation and evidence calculation
+:Author: Will Handley
+:ForkedFrom: https://github.com/cmbant/CosmoMC
+:Homepage: http://polychord.co.uk
+
+.. image:: https://travis-ci.org/williamjameshandley/CosmoChord.svg?branch=master
+    :target: https://travis-ci.org/williamjameshandley/CosmoChord
+.. image:: https://zenodo.org/badge/158467573.svg
+   :target: https://zenodo.org/badge/latestdoi/158467573
+
 
 Description and installation
 =============================
 
-For full details see the `ReadMe <http://cosmologist.info/cosmomc/readme.html>`_.
+CosmoChord is a fork of `CosmoMC <https://github.com/cmbant/CosmoMC>`__, which
+adds nested sampling provided by PolyChord.
 
-Algorithm details
-==================
+Installation procedure:
 
-See the latest `paper <http://arxiv.org/abs/1304.4473>`_.
+.. bash::
+   
+   git clone --recursive https://github.com/williamjameshandley/CosmoChord
+   cd CosmoChord
+   make
+   export OMP_NUM_THREADS=1
+   ./cosmomc test.ini
 
-GetDist
-===================
+To run, you should add ``action=5``  to your ini file, and include
+``batch3/polychord.ini``. Consider modifying ``test.ini``
 
-CosmoMC includes the GetDist python sample analysis and plotting package, which is
-also `available separately <http://getdist.readthedocs.org/en/latest/>`_.
+Changes
+=======
+You can see the key changes by running:
 
-Branches
-=============================
+.. bash::
+   git remote add upstream https://github.com/cmbant/CosmoMC
+   git fetch upstream
+   git diff --stat upstream/master
+   git diff  upstream/master source 
 
-The master branch contains latest changes to the main release version, using latest CAMB 1.x.
 
-.. image:: https://secure.travis-ci.org/cmbant/CosmoMC.png?branch=master
-  :target: https://secure.travis-ci.org/cmbant/CosmoMC/builds
+The changes to CosmoMC are minor:
 
-The planck2018 branch contains the configuration used for the final Planck 2018 analysis, with 
-corresponding CAMB version.
-
-The devel branch is a development branch.
-
-=============
-
-.. raw:: html
-
-    <a href="http://www.sussex.ac.uk/astronomy/"><img src="https://cdn.cosmologist.info/antony/Sussex.png" height="170px"></a>
-    <a href="http://erc.europa.eu/"><img src="https://erc.europa.eu/sites/default/files/content/erc_banner-vertical.jpg" height="200px"></a>
+- Nested sampling heavily samples the tails of the posterior. This means that
+  there need to be more corrections for these regions that are typically
+  unexplored by the default metropolis hastings tool. This is now implemented
+  by separate CAMB git submodule
+- You should **not** use openmp parallelisation, as this in inefficient when
+  using PolyChord. Instead, you should use pure MPI parallelisation, and you
+  may use as many cores as you have live points.
