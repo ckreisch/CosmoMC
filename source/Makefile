@@ -86,7 +86,7 @@ endif
 
 endif
 
-MPIF90C ?= mpif90
+MPIF90C ?= mpif90 -f90=ifort
 
 
 #use "make RECOMBINATION=cosmorec" to build with CosmoRec rather than RECFAST default
